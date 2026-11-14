@@ -1,0 +1,12 @@
+{
+  "name": "live-lottery",
+  "version": "1.0.0",
+  "description": "실시간 생중계 추첨기",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

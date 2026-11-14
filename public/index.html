@@ -258,7 +258,9 @@
   const namesBox = $("names"), overlay = $("overlay"), hub = $("hub"), spinBtn = $("spinBtn"), pointer = $("pointer"), modalBg = $("modalBg");
 
   // 진행자 키: 주소 끝에 #host=키
-  const hostKey = (/host=([A-Za-z0-9_-]{8,128})/.exec(location.hash) || [])[1] || "";
+  // (특수문자가 섞인 키도 인식하고, 주소창에서 #host=만 바꿔 입력해도 바로 다시 열리게 함)
+  const hostKey = (() => { const m = /host=([^&]+)/.exec(location.hash); if (!m) return ""; try { return decodeURIComponent(m[1]).trim(); } catch { return m[1].trim(); } })();
+  window.addEventListener("hashchange", () => location.reload());
 
   let state = { names: [], rest: 0, spin: null, history: [], showWinner: false };
   let role = "connecting";

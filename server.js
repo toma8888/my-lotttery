@@ -8,10 +8,12 @@ const path = require("path");
 const crypto = require("crypto");
 
 const PORT = process.env.PORT || 3000;
-let HOST_KEY = process.env.HOST_KEY;
-if (!HOST_KEY || HOST_KEY.length < 8) {
+let HOST_KEY = (process.env.HOST_KEY || "").trim();
+if (!HOST_KEY) {
   HOST_KEY = crypto.randomBytes(9).toString("base64url");
-  console.log("[경고] HOST_KEY 환경변수가 없어 임시 키를 만들었습니다:", HOST_KEY);
+  console.log("[경고] HOST_KEY 변수가 없어 임시 키를 만들었습니다:", HOST_KEY);
+} else {
+  console.log("HOST_KEY 설정됨 (" + HOST_KEY.length + "자)");
 }
 
 const TAU = Math.PI * 2;
@@ -116,8 +118,9 @@ function cleanNames(arr) {
 function handle(c, m) {
   if (m.t === "ping") return send(c, { t: "pong", c: m.c, s: Date.now() });
   if (m.t === "auth") {
-    c.isHost = typeof m.key === "string" && m.key.length === HOST_KEY.length &&
-      crypto.timingSafeEqual(Buffer.from(m.key), Buffer.from(HOST_KEY));
+    const a = Buffer.from(typeof m.key === "string" ? m.key.trim() : ""), b = Buffer.from(HOST_KEY);
+    c.isHost = a.length === b.length && crypto.timingSafeEqual(a, b);
+    console.log(c.isHost ? "진행자 접속" : "진행자 키 불일치 (입력 " + a.length + "자 / 설정 " + b.length + "자)");
     return send(c, { t: "role", host: c.isHost });
   }
   if (!c.isHost) return; // 아래는 진행자만 가능
